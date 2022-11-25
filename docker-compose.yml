@@ -1,0 +1,71 @@
+version: '3'
+
+services:
+  server1:
+    build: ./server
+    hostname: server001
+    stdin_open: true
+    tty: true
+    ports: 
+      - 5040:5040
+    environment:
+      - PRIMARY_SERVER_PORT=5040
+      - SECONDARY_SERVER_PORT=5041
+      - SERVER_ROLE=Primary
+      - HOST_NAME=hostname
+    # networks:
+    #   - pub-sub-distributed-rendezvous
+    container_name: server001
+
+  server2:
+    build: ./server
+    hostname: server002
+    stdin_open: true
+    tty: true
+    ports: 
+      - 5041:5041
+    environment:
+      - PRIMARY_SERVER_PORT=5040
+      - SECONDARY_SERVER_PORT=5041
+      - SERVER_ROLE=Secondary
+      - HOST_NAME=hostname
+    # networks:
+    #   - pub-sub-distributed-rendezvous
+    depends_on:
+      - server1
+    container_name: server002
+
+  client1:
+    build: ./client
+    hostname: client-01
+    stdin_open: true
+    tty: true
+    environment:
+      - SERVER_PORT=5040
+      - SERVER_HOST=server001
+      - CLIENT_NAME=client-01
+    #networks:
+    #  - pub-sub-distributed-rendezvous
+    depends_on:
+      - server1
+    container_name: client001
+
+  # client2:
+  #   build: ./client
+  #   hostname: client-02
+  #   stdin_open: true
+  #   tty: true
+  #   environment:
+  #     - SERVER_PORT=5041
+  #     - SERVER_HOST=server002
+  #     - CLIENT_NAME=client-02
+  #   # networks:
+  #   #   - pub-sub-distributed-rendezvous
+  #   depends_on:
+  #     - server2
+  #   container_name: client002
+
+# networks:
+#   pub-sub-distributed-rendezvous:
+#     driver: bridge
+
